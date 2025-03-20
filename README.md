@@ -104,3 +104,52 @@
 初始超级用户凭据:
 - 邮箱: admin@example.com
 - 密码: admin123 
+
+## 安全配置管理
+
+本项目提供了多种方式安全存储和管理敏感配置（如数据库密码、密钥等）：
+
+### 开发环境
+
+1. **使用.env文件（仅限本地开发）**
+   - 复制`.env.example`为`.env`并填入本地开发所需的配置
+   - 确保`.env`已添加到`.gitignore`中，不要提交到代码仓库
+   - 限制`.env`文件的访问权限：`chmod 600 .env`（Linux/Mac）
+
+2. **使用环境变量**
+   - 直接在系统或IDE中设置环境变量
+   - 例如：`export DATABASE_URL=postgresql://user:password@localhost/db`
+   - 这些变量会覆盖`.env`文件中的同名配置
+
+### 生产环境
+
+1. **容器环境变量**
+   - 在容器编排工具（Docker Compose、Kubernetes）中设置环境变量
+   - 可以从CI/CD系统中获取敏感信息并注入环境变量
+
+2. **使用密钥管理服务**
+   - AWS Secrets Manager、Azure Key Vault、HashiCorp Vault等
+   - 项目已集成密钥获取接口，需配置相应SDK（见`app/core/config.py`）
+   - 示例：
+     ```python
+     # 在config.py中完成如下配置
+     import boto3
+     
+     def get_aws_secret(secret_name):
+         client = boto3.client('secretsmanager')
+         response = client.get_secret_value(SecretId=secret_name)
+         return response['SecretString']
+     ```
+
+3. **容器编排密钥管理**
+   - Docker Swarm Secrets: `docker secret create db_password ./password.txt`
+   - Kubernetes Secrets: `kubectl create secret generic db-secret --from-literal=password=mypassword`
+
+### 最佳实践
+
+- 不同环境使用不同的密钥
+- 定期轮换密钥
+- 使用最小权限原则配置访问控制
+- 记录密钥访问日志
+- 避免在日志中输出敏感信息
+- 考虑使用密钥加密服务进行额外保护 
