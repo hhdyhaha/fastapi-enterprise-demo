@@ -57,6 +57,9 @@ class Settings(BaseSettings):
 
     # 数据库配置 - 优先从密钥服务获取
     DATABASE_URL: str = None
+    POSTGRES_USER: str = "postgres"
+    POSTGRES_PASSWORD: str = None
+    POSTGRES_DB: str = "fastapi_demo"
     
     # JWT配置 - 优先从密钥服务获取
     SECRET_KEY: str = None
@@ -72,6 +75,9 @@ class Settings(BaseSettings):
         # 覆盖敏感配置，优先使用密钥管理服务
         self.DATABASE_URL = get_secret("DATABASE_URL", self.DATABASE_URL)
         self.SECRET_KEY = get_secret("SECRET_KEY", self.SECRET_KEY)
+        self.POSTGRES_USER = get_secret("POSTGRES_USER", self.POSTGRES_USER)
+        self.POSTGRES_PASSWORD = get_secret("POSTGRES_PASSWORD", self.POSTGRES_PASSWORD)
+        self.POSTGRES_DB = get_secret("POSTGRES_DB", self.POSTGRES_DB)
 
 
 settings = Settings() 
